@@ -18,7 +18,8 @@ CasoModel.init({
     id_subcategoria: { type: DataTypes.INTEGER, allowNull: false },
     mensaje: { type: DataTypes.STRING(255), allowNull: false },
     userCreatedAt: { type: DataTypes.BIGINT, allowNull: true },
-    userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true }
+    userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true },
+    correlativo: { type: DataTypes.BIGINT, allowNull: false}
 }, {
     sequelize,
     tableName: 'tbl_caso',
