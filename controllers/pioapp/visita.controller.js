@@ -7,6 +7,7 @@ const { Op } = require('sequelize');
 const VisitaEmergenciaModel = require('../../models/pioapp/tables/visita_emergencia.model');
 const EstadoVisitaEmergenciaModel = require('../../models/pioapp/tables/estado_visita_emergencia.model');
 const Vw_detalle_visita_emergencia = require("../../models/pioapp/views/vw_detalle_visita_emergencia.view");
+require('dotenv').config();
 
 VisitaModel.belongsTo(UserModel, { foreignKey: '"userCreatedAt"' })
 UserModel.hasMany(VisitaModel, { foreignKey: 'id_users' });
@@ -159,7 +160,8 @@ async function createVisitaEmergencia(req, res) {
             const notification = await fetch(`https://services.sistemaspinulito.com/pioapi/notificaciones/send`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'                    
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${btoa(`${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_PASS}`)}`,
                 },
                 body: JSON.stringify({
                     user: Number(user_asignado.substring(2)),
