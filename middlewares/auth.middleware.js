@@ -6,12 +6,18 @@ function authMiddleware(req, res, next) {
     const authHeader = req.headers['authorization'];
 
     if(!authHeader){
-        return res.status(401).json({ error: 'Token requerido' });
+        return res.status(401).json({
+            code: 'TOKEN_REQUIRED',
+            error: 'Token requerido'
+        });
     }
 
-    const token = authHeader.split(' ')[1];
-    if(!token){
-        return res.status(401).json({ error: 'Token inválido' });
+    const [scheme, token] = authHeader.split(' ');
+    if(scheme !== 'Bearer' || !token){
+        return res.status(401).json({
+            code: 'TOKEN_INVALID',
+            error: 'Token inválido'
+        });
     }
     
     try {
@@ -19,9 +25,24 @@ function authMiddleware(req, res, next) {
         req.user = decoded;
         next();
     } catch (err) {
-        console.log("Error ", err)
+        console.log("Auth Error ", err);
+
+        if(err.name == 'TokenExpiredError') {
+            return res.status(401).json({
+                code: 'TOKEN_EXPIRED',
+                error: 'Token no válido o expirado',
+                details: err.message,
+                expiredAt: err.expiredAt
+            });
+        }
+        
+        if (err.name === 'JsonWebTokenError') {
+            return res.status(401).json({ code: 'TOKEN_INVALID', error: 'Token inválido' });
+        }
+
         return res.status(500).json({
-            error: 'Token no válido o expirado',
+            code: 'TOKEN_VERIFICATION_ERROR',
+            error: 'Error verificando token',
             details: err.message
         });
     }

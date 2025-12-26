@@ -20,10 +20,11 @@ VisitaEmergenciaModel.init({
     user_asignado: {type: DataTypes.STRING(100), allowNull: false},
     nombre_user_asignado: {type: DataTypes.TEXT, allowNull: false},
     userCreatedAt: { type: DataTypes.BIGINT, allowNull: true },
-    userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true }
+    userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true },
+    id_caso: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false }
 }, {
     sequelize,
-    tableName: 'visita_emergencia',
+    tableName: 'tbl_visita_emergencia',
     schema: 'web',
     timestamps: true
 });

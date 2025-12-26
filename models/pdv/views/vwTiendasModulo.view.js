@@ -5,7 +5,7 @@ class vwTiendasModulo extends Model {}
 
 function initvwTiendasModulo(sequelizeInstance) {
   vwTiendasModulo.init({
-    id_departamento: { type: DataTypes.INTEGER, allowNull: false },
+    id_departamento: { type: DataTypes.INTEGER, allowNull: false, primaryKey: true },
     id_tienda: { type: DataTypes.INTEGER, allowNull: false },
     codigo_empresa: { type: DataTypes.STRING(12), allowNull: false },
     nombre_empresa: { type: DataTypes.STRING(128), allowNull: false },

@@ -35,7 +35,7 @@ async function login(req, res) {
             puesto: userResult.puesto_trabajo,
             rol: userResult.id_rol
         };
-        const token = jwt.sign(payload, SECRET, { expiresIn: "8h" });
+        const token = jwt.sign(payload, SECRET, { expiresIn: "24h" });
 
         return res.json({
             details: "Login exitoso",

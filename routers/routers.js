@@ -5,6 +5,7 @@ const users = require('../controllers/pioapp/users.controller');
 const empleados = require('../controllers/nomina/empleado.controller');
 const supervisores = require('../controllers/pdv/vwDwhSupervisores.controller');
 const tiendas = require('../controllers/pdv/vwTiendasModulo.controller');
+const casos = require('../controllers/pioapp/caso.controller');
 const login = require('../services/authService');
 const auth = require('../middlewares/auth.middleware');
 
@@ -15,7 +16,8 @@ router.get('/visitas/getUltimaVisitaBySupervisor/:id_users', auth, visita.getUlt
 router.get('/visitas/getTiposVisita', auth, visita.getTiposVisita);
 router.post('/visitas/createVisitaEmergencia', auth, visita.createVisitaEmergencia);
 router.get('/visitas/getVisitasEmergencia', auth, visita.getVisitasEmergencia);
-router.get('/visitas/getVisitasEmergenciaById/:id_visita', auth, visita.getVisitasEmergenciaById)
+router.get('/visitas/getVisitasEmergenciaById/:id_visita', auth, visita.getVisitasEmergenciaById);
+router.get('/visitas/getVisitasEmergenciaByCaso/:id_caso', auth, visita.getVisitasEmergenciaByCaso);
 
 //USERS
 router.get('/users/getAllUsers', auth, users.getAllUsers);
@@ -29,8 +31,20 @@ router.get('/supervisores/getAllSupervisors', auth, supervisores.getAllSuperviso
 
 //TIENDAS
 router.get('/tiendas/getAllTiendas/:cod_tienda', auth, tiendas.getAllTiendas);
+router.get('/tiendas/getTiendaByIdAndEmpresa/:cod_tienda/:cod_empresa', auth, tiendas.getTiendaByIdAndEmpresa);
 
 //LOGIN
 router.post('/login', login);
+
+//CASOS
+router.get('/casos/getAllTiposSolicitudes', auth, casos.getAllTiposSolicitudes);
+router.get('/casos/getAllImpactos', auth, casos.getAllImpactos);
+router.get('/casos/getAllUrgencias', auth, casos.getAllUrgencias);
+router.get('/casos/getAllCategorias', auth, casos.getAllCategorias);
+router.get('/casos/getSubcategoriaByCategoria/:id_categoria', auth, casos.getSubcategoriaByCategoria)
+router.post('/casos/createCaso', auth, casos.createCaso);
+router.get('/casos/getCasosByDivision/:division', auth, casos.getCasosByDivision);
+router.get('/casos/getCasoById/:id_caso', auth, casos.getCasoById);
+router.put('/casos/updateCaso/:id_caso', auth, casos.updateCaso);
 
 module.exports = router;

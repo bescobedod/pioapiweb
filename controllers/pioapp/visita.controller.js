@@ -120,15 +120,16 @@ async function createVisitaEmergencia(req, res) {
             comentario,
             fecha_programacion,
             user_asignado,
-            nombre_user_asignado
+            nombre_user_asignado,
+            id_caso
         } = req.body;
         
         const visitaActual = await VisitaEmergenciaModel.findOne({
             where: {
                 user_asignado: req.body.user_asignado,
                 id_estado:  {
-                    [Op.not]: 3
-                },
+                    [Op.ne]: 3
+                }
             },
             raw: true 
         });
@@ -152,8 +153,29 @@ async function createVisitaEmergencia(req, res) {
                 id_estado: 1,
                 fecha_programacion,
                 user_asignado,
-                nombre_user_asignado
+                nombre_user_asignado,
+                id_caso
             });
+            const notification = await fetch(`https://services.sistemaspinulito.com/pioapi/notificaciones/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'                    
+                },
+                body: JSON.stringify({
+                    user: Number(user_asignado.substring(2)),
+                    body: comentario,
+                    title: tienda_nombre,
+                    id_asunto_notificacion: 2,
+                    data_payload: { idVisitaEmergencia:  nuevaVisita.id_visita}
+                })
+            })
+
+            const dataNotification = await notification.json();
+            console.log(dataNotification)
+            if(!notification.ok){
+                throw new Error(dataNotification.message);
+                
+            }
             return res.json({ nuevaVisita });
         }
     } catch (err) {
@@ -203,6 +225,32 @@ async function getVisitasEmergenciaById(req, res) {
     }
 }
 
+async function getVisitasEmergenciaByCaso(req, res) {
+    const { id_caso } = req.params;
+
+    try {
+        const sequelizePioApp = await sequelizeInit('PIOAPP');
+        const vw_detalle_visita_emergencia = Vw_detalle_visita_emergencia(sequelizePioApp);
+        const visita = await vw_detalle_visita_emergencia.findOne({
+            where: { id_caso }
+        });
+
+        if (!visita) {
+            return res.status(404).json({
+                message: "No existe visita para este caso"
+            });
+        }
+
+        return res.json(visita);
+
+    } catch (err) {
+        return res.status(500).json({
+            error: "Error al obtener visita de emergencia",
+            details: err.message
+        });
+    }
+}
+
 module.exports = {
     getAllVisitas,
     getVisitaBySupervisor,
@@ -210,5 +258,6 @@ module.exports = {
     getTiposVisita,
     createVisitaEmergencia,
     getVisitasEmergencia,
-    getVisitasEmergenciaById
+    getVisitasEmergenciaById,
+    getVisitasEmergenciaByCaso
 };

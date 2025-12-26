@@ -18,7 +18,8 @@ async function getAllTiendas(req, res) {
                 'direccion_tienda',
                 'inactiva',
                 'altitud',
-                'latitud'
+                'latitud',
+                'division'
             ],
             where: {
                 inactiva: false,
@@ -40,6 +41,26 @@ async function getAllTiendas(req, res) {
     }
 }
 
+async function getTiendaByIdAndEmpresa(req, res) {
+    const { cod_tienda, cod_empresa } = req.params;
+    console.log(cod_tienda)
+    try {
+        const sequelizePDV = await sequelizeInit('PDV');
+        const TiendaModuloModel = initTiendaModulo(sequelizePDV);
+        const tienda = await TiendaModuloModel.findOne({
+            where: {
+                codigo_tienda: cod_tienda,
+                codigo_empresa: cod_empresa
+            },
+            raw: true
+        });
+        return res.json(tienda);
+    } catch (err) {
+        return res.status(500).json({ error: 'Error al obtener las tiendas', details: err.message });
+    }
+}
+
 module.exports = {
-    getAllTiendas
+    getAllTiendas,
+    getTiendaByIdAndEmpresa
 };

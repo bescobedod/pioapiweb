@@ -9,7 +9,7 @@ EstadoVisitaEmergenciaModel.init({
     descripcion: { type: DataTypes.TEXT, allowNull: true }
 }, {
     sequelize,
-    tableName: 'estado_visita_emergencia',
+    tableName: 'tbl_estado_visita_emergencia',
     schema: 'web',
     timestamps: false
 });
