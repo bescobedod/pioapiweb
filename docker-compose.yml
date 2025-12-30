@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  pioapiweb:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: pioapiweb
+    ports:
+      - "5005:5005"
+    env_file:
+      - .env
+    restart: unless-stopped
