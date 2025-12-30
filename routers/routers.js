@@ -28,6 +28,7 @@ router.get('/empleados/getAllEmpleados', auth, empleados.getAllEmpleados);
 
 //SUPERVISORES
 router.get('/supervisores/getAllSupervisors', auth, supervisores.getAllSupervisors);
+router.get('/supervisores/getSupervisorBycodEmpleado/:codE', auth, supervisores.getSupervisorBycodEmpleado);
 
 //TIENDAS
 router.get('/tiendas/getAllTiendas/:cod_tienda', auth, tiendas.getAllTiendas);

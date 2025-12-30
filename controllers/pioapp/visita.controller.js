@@ -141,12 +141,6 @@ async function createVisitaEmergencia(req, res) {
             },
             raw: true 
         });
-
-        if(visitaActual){
-            return res.json({
-                message: 'No se puede asignar visita de emergencia, supervisor ya cuenta con una en curso'
-            })
-        } else{
             const nuevaVisita = await VisitaEmergenciaModel.create({
                 empresa,
                 tienda,
@@ -188,7 +182,6 @@ async function createVisitaEmergencia(req, res) {
                 
             }
             return res.json({ nuevaVisita });
-        }
     } catch (err) {
         return res.status(500).json({
             error: 'Error al asignar visita de emergencia',
