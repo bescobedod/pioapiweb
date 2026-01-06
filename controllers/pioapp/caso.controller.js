@@ -5,7 +5,9 @@ const CategoriaModel = require('../../models/pioapp/tables/categoria_caso.model'
 const SubcategoriaModel = require('../../models/pioapp/tables/subcategoria_caso.model');
 const CasoModel = require('../../models/pioapp/tables/caso.model');
 const Vw_detalle_caso = require('../../models/pioapp/views/vw_detalle_caso.view');
-const sequelize = require('../../configuration/db');
+const {sequelizeInit} = require('../../configuration/db');
+const VisitaEmergenciaModel = require('../../models/pioapp/tables/visita_emergencia.model');
+const CasoVisitaReabiertaModel = require('../../models/pioapp/tables/caso_visita_reabierta.model');
 
 //Obtener todos los tipos de solicitudes para los casos
 async function getAllTiposSolicitudes(req, res) {
@@ -56,7 +58,7 @@ async function getAllCategorias(req, res) {
         return res.json(categorias);
     } catch (err) {
         console.error(err);
-        return res.status(500),json({
+        return res.status(500).json({
             error: 'Error al obtener caregorías',
             details: err.message
         })
@@ -77,7 +79,7 @@ async function getSubcategoriaByCategoria(req, res) {
         return res.json(subcategorias);
     } catch (err) {
         console.error(err);
-        return res.status(500),json({
+        return res.status(500).json({
             error: 'Error al obtener subcaregorías',
             details: err.message
         })
@@ -150,12 +152,16 @@ async function createCaso(req, res) {
 async function getCasosByDivision(req, res) {
     const { division } = req.params;
     try {
-        const sequelizePioApp = await sequelize.sequelizeInit('PIOAPP');
+        const sequelizePioApp = await sequelizeInit('PIOAPP');
         const vw_detalle_caso = Vw_detalle_caso(sequelizePioApp);
         const casos = await vw_detalle_caso.findAll({
             where: {
                 division: division
             },
+            order: [
+                ['estado', 'ASC'],
+                ['correlativo', 'DESC']
+            ],
             raw: true
         });
 
@@ -238,6 +244,96 @@ async function updateCaso(req, res) {
     }
 }
 
+async function cierreReaperturaCaso(req, res) {
+    const { id_c, id_e } = req.params;
+    const { motivo } = req.body;
+
+    const estado = Number(id_e);
+    const sequelizePioApp = await sequelizeInit('PIOAPP');
+    const transaction = await sequelizePioApp.transaction();
+
+    try {
+        const caso = await CasoModel.findByPk(id_c, { transaction });
+
+        if (!caso) {
+            await transaction.rollback();
+            return res.status(404).json({ error: 'Caso no encontrado' });
+        }
+
+        // CIERRE DE CASO
+        if (estado === 4) {
+            await caso.update({ id_estado: 4 }, { transaction });
+            await caso.reload({ transaction });
+
+            await transaction.commit();
+
+            return res.json({
+              message: 'Caso cerrado correctamente',
+              caso
+            });
+        }
+
+        // REAPERTURA
+        if (estado === 2) {
+          await caso.update({ id_estado: 2 }, { transaction });
+
+            const visitaEmergencia = await VisitaEmergenciaModel.findOne({
+              where: { id_caso: id_c },
+              transaction
+            });
+
+            if (!visitaEmergencia) {
+                await transaction.rollback();
+                return res.status(404).json({ error: 'Visita no encontrada' });
+            }
+
+            await visitaEmergencia.update({ id_estado: 1 }, { transaction });
+            const casoVisita = await CasoVisitaReabiertaModel.create({
+              id_caso: id_c,
+              id_visita: visitaEmergencia.id_visita,
+              motivo_reapertura: motivo
+            }, { transaction });
+
+            await transaction.commit();
+
+            try {
+              await fetch(`https://services.sistemaspinulito.com/pioapi/notificaciones/send`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  Authorization: `Basic ${Buffer.from(
+                    `${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_PASS}`
+                  ).toString('base64')}`
+                },
+                body: JSON.stringify({
+                  user: Number(visitaEmergencia.user_asignado.substring(2)),
+                  body: visitaEmergencia.comentario,
+                  title: `Visita reabierta: ${visitaEmergencia.tienda_nombre}`,
+                  id_asunto_notificacion: 2,
+                  data_payload: { idVisitaEmergencia: visitaEmergencia.id_visita }
+                })
+              });
+            } catch (err) {
+              console.warn('Notificación falló:', err.message);
+            }
+
+            return res.json({
+              message: 'Caso reabierto correctamente',
+              caso,
+              casoVisita
+            });
+        }
+
+    } catch (err) {
+        await transaction.rollback();
+        console.error(err);
+        return res.status(500).json({
+          error: 'Error al actualizar el caso',
+          details: err.message
+        });
+    }
+}
+
 module.exports = {
     getAllTiposSolicitudes,
     getAllImpactos,
@@ -247,5 +343,6 @@ module.exports = {
     createCaso,
     getCasosByDivision,
     getCasoById,
-    updateCaso
+    updateCaso,
+    cierreReaperturaCaso
 }

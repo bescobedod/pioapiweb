@@ -21,7 +21,8 @@ VisitaEmergenciaModel.init({
     nombre_user_asignado: {type: DataTypes.TEXT, allowNull: false},
     userCreatedAt: { type: DataTypes.BIGINT, allowNull: true },
     userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true },
-    id_caso: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false }
+    id_caso: { type: DataTypes.UUID, defaultValue: DataTypes.UUIDV4, primaryKey: true, allowNull: false },
+    division: { type: DataTypes.INTEGER, allowNull: true }
 }, {
     sequelize,
     tableName: 'tbl_visita_emergencia',

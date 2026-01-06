@@ -15,7 +15,7 @@ router.get('/visitas/getVisitaBySupervisor/:id_users', auth, visita.getVisitaByS
 router.get('/visitas/getUltimaVisitaBySupervisor/:id_users', auth, visita.getUltimaVisitaBySupervisor);
 router.get('/visitas/getTiposVisita', auth, visita.getTiposVisita);
 router.post('/visitas/createVisitaEmergencia', auth, visita.createVisitaEmergencia);
-router.get('/visitas/getVisitasEmergencia', auth, visita.getVisitasEmergencia);
+router.get('/visitas/getVisitasEmergencia/:division', auth, visita.getVisitasEmergencia);
 router.get('/visitas/getVisitasEmergenciaById/:id_visita', auth, visita.getVisitasEmergenciaById);
 router.get('/visitas/getVisitasEmergenciaByCaso/:id_caso', auth, visita.getVisitasEmergenciaByCaso);
 router.get('/visitas/getVisitaByVisitaEmergencia/:id_ve', auth, visita.getVisitaByVisitaEmergencia);
@@ -48,5 +48,6 @@ router.post('/casos/createCaso', auth, casos.createCaso);
 router.get('/casos/getCasosByDivision/:division', auth, casos.getCasosByDivision);
 router.get('/casos/getCasoById/:id_caso', auth, casos.getCasoById);
 router.put('/casos/updateCaso/:id_caso', auth, casos.updateCaso);
+router.put('/casos/cierreReaperturaCaso/:id_c/:id_e', auth, casos.cierreReaperturaCaso);
 
 module.exports = router;

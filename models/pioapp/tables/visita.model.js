@@ -21,6 +21,7 @@ VisitaModel.init({
     google_maps_url: { type: DataTypes.TEXT, allowNull: false },
     userCreatedAt: { type: DataTypes.BIGINT, allowNull: true },
     userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true },
+    id_visita_emergencia: { type: DataTypes.INTEGER, allowNull: true }
 }, {
     sequelize,
     tableName: 'visita',

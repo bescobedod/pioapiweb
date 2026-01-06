@@ -12,7 +12,7 @@ require('dotenv').config();
 //Relación entre tablas de visitas, usuarios, estados de visitas y visitas de emergencia
 VisitaModel.belongsTo(UserModel, { foreignKey: '"userCreatedAt"' })
 //UserModel.hasMany(VisitaModel, { foreignKey: 'id_users' });
-EstadoVisitaEmergenciaModel.hasMany(VisitaEmergenciaModel, { foreignKey: 'id_estado' });
+//EstadoVisitaEmergenciaModel.hasMany(VisitaEmergenciaModel, { foreignKey: 'id_estado' });
 VisitaEmergenciaModel.belongsTo(EstadoVisitaEmergenciaModel, { foreignKey: 'id_estado' })
 
 //Obtener todas las visitas
@@ -128,7 +128,8 @@ async function createVisitaEmergencia(req, res) {
             fecha_programacion,
             user_asignado,
             nombre_user_asignado,
-            id_caso
+            id_caso,
+            division
         } = req.body;
         
         //Buscar si el usuario ya tiene una visita de emergencia en curso, si tiene no puede crearse una nueva
@@ -156,7 +157,8 @@ async function createVisitaEmergencia(req, res) {
                 fecha_programacion,
                 user_asignado,
                 nombre_user_asignado,
-                id_caso
+                id_caso,
+                division
             });
 
             //Envío de notificaciones al supervisor asignado
@@ -176,7 +178,6 @@ async function createVisitaEmergencia(req, res) {
             })
 
             const dataNotification = await notification.json();
-            console.log(dataNotification)
             if(!notification.ok){
                 throw new Error(dataNotification.message);
                 
@@ -192,10 +193,17 @@ async function createVisitaEmergencia(req, res) {
 
 //Obtener todas las visitas de emergencia
 async function getVisitasEmergencia(req, res) {
+    const { division } = req.params;
+
     try {
         const sequelizePioApp = await sequelizeInit('PIOAPP');
         const vw_detalle_visita_emergencia = Vw_detalle_visita_emergencia(sequelizePioApp);
-        const visitas = await vw_detalle_visita_emergencia.findAll({ raw: true });
+        const visitas = await vw_detalle_visita_emergencia.findAll({
+            where: {
+                division: division
+            },
+            raw: true
+        });
 
         return res.json(visitas);
     } catch (err) {
@@ -265,7 +273,8 @@ async function getVisitaByVisitaEmergencia(req, res) {
         const visita = await VisitaModel.findOne({
             where: {
                 id_visita_emergencia: id_ve
-            }
+            },
+            order: [['createdAt', 'DESC']]
         });
         return res.json(visita); 
     } catch (err) {

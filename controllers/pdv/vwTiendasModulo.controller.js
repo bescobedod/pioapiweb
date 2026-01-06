@@ -5,7 +5,6 @@ const { Op } = require('sequelize')
 //Obtener todas las tiendas que tengas coordenadas GPS establecidas
 async function getAllTiendas(req, res) {
     const { cod_tienda } = req.params; //Se excluye tienda enviada como parámetro de las tiendas obtenidas
-    console.log(cod_tienda)
     try {
         const sequelizePDV = await sequelizeInit('PDV');
         const TiendaModuloModel = initTiendaModulo(sequelizePDV);
@@ -45,7 +44,6 @@ async function getAllTiendas(req, res) {
 //Obtener tienda según codigo de tienda y codigo de empresa
 async function getTiendaByIdAndEmpresa(req, res) {
     const { cod_tienda, cod_empresa } = req.params;
-    console.log(cod_tienda)
     try {
         const sequelizePDV = await sequelizeInit('PDV');
         const TiendaModuloModel = initTiendaModulo(sequelizePDV);
