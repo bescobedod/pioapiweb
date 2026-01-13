@@ -8,6 +8,7 @@ const VisitaEmergenciaModel = require('../../models/pioapp/tables/visita_emergen
 const EstadoVisitaEmergenciaModel = require('../../models/pioapp/tables/estado_visita_emergencia.model');
 const Vw_detalle_visita_emergencia = require("../../models/pioapp/views/vw_detalle_visita_emergencia.view");
 const CasoVisitaReabiertaModel = require('../../models/pioapp/tables/caso_visita_reabierta.model');
+const CasoModel = require('../../models/pioapp/tables/caso.model');
 require('dotenv').config();
 
 //Relación entre tablas de visitas, usuarios, estados de visitas y visitas de emergencia
@@ -159,8 +160,56 @@ async function createVisitaEmergencia(req, res) {
                 user_asignado,
                 nombre_user_asignado,
                 id_caso,
-                division
+                division,
+                userCreatedAt: req.user.id_user
             });
+
+            const caso = await CasoModel.findByPk(id_caso);
+
+            const usersEmail = await UserModel.findAll({
+                where: {
+                    [Op.or]: [
+                        { id_users: req.user.id_user },
+                        { division: division },
+                        { id_users: caso.userCreatedAt}
+                    ]
+                },
+                attributes: ['email'],
+                raw: true
+            });
+
+            const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
+
+            const htmlBody = `
+                <h1>SE HA ASIGNADO LA VISITA ${nuevaVisita.id_visita} PARA LA TIENDA: ${tienda_nombre}</h1>
+                <p>${comentario}</p>
+                <p style='color: red;'>Puedes ver el estado del la visita en: https://pioapp.pinulitogt.com/</p>`;
+
+            const basicAuth = Buffer
+                .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
+                .toString('base64');
+
+            const email = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${basicAuth}`,
+                },
+                body: JSON.stringify({
+                    emisor: 'PIOAPP',
+                    email_receptor: emailsList,
+                    asunto: `AVISO VISITA ASIGNADA: ${tienda_nombre}`,
+                    data_context: {
+                        body: htmlBody
+                    }
+                })
+            });
+
+            const emailNotification = await email.json();
+            
+            if(!email.ok){
+                throw new Error(emailNotification.message);    
+            }
 
             //Envío de notificaciones al supervisor asignado
             const notification = await fetch(`https://services.sistemaspinulito.com/pioapi/notificaciones/send`, {

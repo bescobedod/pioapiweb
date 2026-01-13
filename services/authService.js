@@ -31,10 +31,12 @@ async function login(req, res) {
         }
 
         const payload = {
-            codigo_user: userResult.cod_empleado,
+            id_user: userResult.id_users,
             nombre: `${userResult.first_name} ${userResult.first_last_name}`,
             puesto: userResult.puesto_trabajo,
-            rol: userResult.id_rol
+            rol: userResult.id_rol,
+            email: userResult.email,
+            division: userResult.division
         };
         const token = jwt.sign(payload, SECRET, { expiresIn: "24h" });
 

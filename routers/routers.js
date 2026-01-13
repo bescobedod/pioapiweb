@@ -24,6 +24,7 @@ router.get('/visitas/getVisitasReabiertas/:id_v/:id_c', auth, visita.getVisitasR
 //USERS
 router.get('/users/getAllUsers', auth, users.getAllUsers);
 router.get('/users/getAllSupervisors', auth, users.getAllSupervisors);
+router.put('/users/updateUser', auth, users.updateUser);
 
 //EMPLEADOS
 router.get('/empleados/getAllEmpleados', auth, empleados.getAllEmpleados);

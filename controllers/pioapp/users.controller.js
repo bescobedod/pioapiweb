@@ -45,7 +45,36 @@ async function getAllSupervisors(req, res) {
     }
 }
 
+async function updateUser(req, res) {
+    const { email } = req.body;
+
+    try {
+        const user = await UserModel.findByPk(req.user.id_user);
+        
+        if(user) {
+            await user.update({
+                email
+            })
+
+            return res.json({
+                message: 'Datos de usuario actualizados',
+                user
+            })
+        } else {
+            return res.status(404).json({
+                message: 'Usuario no encontrado'
+            })
+        }
+    } catch (err) {
+        return res.status(500).json({
+            error: 'Error al intentar actualizar datos del usuario',
+            details: err.message
+        })
+    }
+}
+
 module.exports = {
     getAllUsers,
-    getAllSupervisors
+    getAllSupervisors,
+    updateUser
 }

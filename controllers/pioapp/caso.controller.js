@@ -8,6 +8,8 @@ const Vw_detalle_caso = require('../../models/pioapp/views/vw_detalle_caso.view'
 const {sequelizeInit} = require('../../configuration/db');
 const VisitaEmergenciaModel = require('../../models/pioapp/tables/visita_emergencia.model');
 const CasoVisitaReabiertaModel = require('../../models/pioapp/tables/caso_visita_reabierta.model');
+const UserModel = require('../../models/pioapp/tables/users.model');
+const { Op } = require('sequelize');
 
 //Obtener todos los tipos de solicitudes para los casos
 async function getAllTiposSolicitudes(req, res) {
@@ -124,7 +126,7 @@ async function createCaso(req, res) {
             return res.json({
                 message: 'No se puede crear el caso, ya se ha creado uno con la misma información'
             })
-        } else{
+        } else {
             const nuevoCaso = await CasoModel.create({
                 id_tienda,
                 tienda_nombre,
@@ -136,8 +138,55 @@ async function createCaso(req, res) {
                 id_urgencia,
                 id_categoria,
                 id_subcategoria,
-                mensaje
+                mensaje,
+                userCreatedAt: req.user.id_user
             });
+            
+            const usersEmail = await UserModel.findAll({
+                where: {
+                    [Op.or]: [
+                        { id_users: req.user.id_user },
+                        { division: division }
+                    ]
+                },
+                attributes: ['email'],
+                raw: true
+            });
+
+            const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
+
+            const htmlBody = `
+                <h1>SE HA CREADO EL CASO ${nuevoCaso.correlativo} PARA LA TIENDA: ${tienda_nombre}</h1>
+                <p>${mensaje}</p>
+                <p style='color: red;'>Puedes ver el estado del caso en: <a href="https://pioapp.pinulitogt.com/">https://pioapp.pinulitogt.com/</a></p>
+                <hr>
+                <p>${emailsList}</>`;
+
+            const basicAuth = Buffer
+                .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
+                .toString('base64');
+
+            const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${basicAuth}`,
+                },
+                body: JSON.stringify({
+                    emisor: 'PIOAPP',
+                    email_receptor: 'oscar.alfaro@corporacionalisa.com',
+                    asunto: `AVISO CASO CREADO: ${tienda_nombre}`,
+                    data_context: {
+                        body: htmlBody
+                    }
+                })
+            });
+
+            const dataNotification = await notification.json();
+            
+            if(!notification.ok){
+                throw new Error(dataNotification.message);    
+            }
             return res.json({ nuevoCaso });
         }
     } catch (err) {
@@ -244,6 +293,7 @@ async function updateCaso(req, res) {
     }
 }
 
+//Cierre o reapertura de casos por parte de gestion administrativa
 async function cierreReaperturaCaso(req, res) {
     const { id_c, id_e } = req.params;
     const { motivo } = req.body;
@@ -260,12 +310,56 @@ async function cierreReaperturaCaso(req, res) {
             return res.status(404).json({ error: 'Caso no encontrado' });
         }
 
+        const usersEmail = await UserModel.findAll({
+            where: {
+                [Op.or]: [
+                    { id_users: req.user.id_user },
+                    { division: caso.division }
+                ]
+            },
+            attributes: ['email'],
+            raw: true
+        });
+
+        const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
+            
+        const basicAuth = Buffer
+            .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
+            .toString('base64');
+
         // CIERRE DE CASO
         if (estado === 4) {
             await caso.update({ id_estado: 4 }, { transaction });
             await caso.reload({ transaction });
 
             await transaction.commit();
+
+            const htmlBody = `
+                <h1>SE HA CERRADO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
+                <p>¡Felicidades! El caso se ha cerrado exitosamente</p>
+                <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
+
+            const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${basicAuth}`,
+                },
+                body: JSON.stringify({
+                    emisor: 'PIOAPP',
+                    email_receptor: emailsList,
+                    asunto: `AVISO CASO CERRADO: ${caso.tienda_nombre}`,
+                    data_context: {
+                        body: htmlBody
+                    }
+                })
+            });
+
+            const dataNotification = await notification.json();
+            
+            if(!notification.ok){
+                throw new Error(dataNotification.message);    
+            }
 
             return res.json({
               message: 'Caso cerrado correctamente',
@@ -315,6 +409,33 @@ async function cierreReaperturaCaso(req, res) {
               });
             } catch (err) {
               console.warn('Notificación falló:', err.message);
+            }
+
+            const htmlBody = `
+                <h1>SE HA REABIERTO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
+                <p>${motivo}</p>
+                <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
+
+            const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Basic ${basicAuth}`,
+                },
+                body: JSON.stringify({
+                    emisor: 'PIOAPP',
+                    email_receptor: emailsList,
+                    asunto: `AVISO CASO REABIERTO: ${caso.tienda_nombre}`,
+                    data_context: {
+                        body: htmlBody
+                    }
+                })
+            });
+
+            const dataNotification = await notification.json();
+            
+            if(!notification.ok){
+                throw new Error(dataNotification.message);    
             }
 
             return res.json({

@@ -19,6 +19,7 @@ UserModel.init({
     puesto_trabajo: { type: DataTypes.STRING(500), allowNull: true },
     userCreatedAt: { type: DataTypes.BIGINT, allowNull: true },
     userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true },
+    division: { type: DataTypes.INTEGER, allowNull: true }
 }, {
     sequelize,
     tableName: 'users',
