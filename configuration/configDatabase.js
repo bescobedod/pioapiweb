@@ -10,13 +10,14 @@ const configDatabase = {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
         dialect: process.env.DB_CONNECTION,
-        timezone: 'America/Guatemala',
+        timezone: '-06:00',
         dialectOptions: {
+          useUTC: false,
           ssl: {
             require: true,
             rejectUnauthorized: false
-          },
-        },
+          }
+        }
       }
     },
     NOMINA: {

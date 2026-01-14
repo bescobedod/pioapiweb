@@ -9,6 +9,7 @@ const EstadoVisitaEmergenciaModel = require('../../models/pioapp/tables/estado_v
 const Vw_detalle_visita_emergencia = require("../../models/pioapp/views/vw_detalle_visita_emergencia.view");
 const CasoVisitaReabiertaModel = require('../../models/pioapp/tables/caso_visita_reabierta.model');
 const CasoModel = require('../../models/pioapp/tables/caso.model');
+const moment = require('moment-timezone');
 require('dotenv').config();
 
 //Relación entre tablas de visitas, usuarios, estados de visitas y visitas de emergencia
@@ -48,15 +49,23 @@ async function getVisitaBySupervisor(req, res){
                 codigo_usuario_visita: id_users,
                 fecha_hora_visita: {
                     [Op.between]: [
-                        new Date(`${startDate}T00:00:00`),
-                        new Date(`${endDate}T23:59:59`)]
+                        `${startDate}T00:00:00`,
+                        `${endDate}T23:59:59`]
                 }
 
             },
             order: [["fecha_hora_visita", "DESC"]],
             raw: true
         });
-        return res.json(visitas);
+
+        const visitasFormateadas = visitas.map(v => ({
+            ...v,
+            fecha_hora_visita: moment(v.fecha_hora_visita)
+                .tz('America/Guatemala')
+                .format('YYYY-MM-DD HH:mm:ss')
+        }));
+
+        return res.json(visitasFormateadas);
     } catch (err) {
         return res.status(500).json({
             error: 'Error al obtener visitas',

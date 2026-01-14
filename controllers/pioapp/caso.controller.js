@@ -159,8 +159,7 @@ async function createCaso(req, res) {
                 <h1>SE HA CREADO EL CASO ${nuevoCaso.correlativo} PARA LA TIENDA: ${tienda_nombre}</h1>
                 <p>${mensaje}</p>
                 <p style='color: red;'>Puedes ver el estado del caso en: <a href="https://pioapp.pinulitogt.com/">https://pioapp.pinulitogt.com/</a></p>
-                <hr>
-                <p>${emailsList}</>`;
+                <hr>`;
 
             const basicAuth = Buffer
                 .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
