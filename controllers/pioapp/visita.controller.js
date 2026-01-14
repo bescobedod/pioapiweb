@@ -187,6 +187,30 @@ async function createVisitaEmergencia(req, res) {
                 raw: true
             });
 
+            //Envío de notificaciones al supervisor asignado
+            const notification = await fetch(`https://services.sistemaspinulito.com/pioapi/notificaciones/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                  Authorization: `Basic ${Buffer.from(
+                    `${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_PASS}`
+                  ).toString('base64')}`
+                },
+                body: JSON.stringify({
+                    user: Number(user_asignado.substring(2)),
+                    body: comentario,
+                    title: tienda_nombre,
+                    id_asunto_notificacion: 2,
+                    data_payload: { idVisitaEmergencia:  nuevaVisita.id_visita}
+                })
+            })
+
+            const dataNotification = await notification.json();
+            if(!notification.ok){
+                throw new Error(dataNotification.message);
+                
+            }
+
             const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
 
             const htmlBody = `
@@ -221,29 +245,6 @@ async function createVisitaEmergencia(req, res) {
                 throw new Error(emailNotification.message);    
             }
 
-            //Envío de notificaciones al supervisor asignado
-            const notification = await fetch(`https://services.sistemaspinulito.com/pioapi/notificaciones/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                  Authorization: `Basic ${Buffer.from(
-                    `${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_PASS}`
-                  ).toString('base64')}`
-                },
-                body: JSON.stringify({
-                    user: Number(user_asignado.substring(2)),
-                    body: comentario,
-                    title: tienda_nombre,
-                    id_asunto_notificacion: 2,
-                    data_payload: { idVisitaEmergencia:  nuevaVisita.id_visita}
-                })
-            })
-
-            const dataNotification = await notification.json();
-            if(!notification.ok){
-                throw new Error(dataNotification.message);
-                
-            }
             return res.json({ nuevaVisita });
     } catch (err) {
         return res.status(500).json({
