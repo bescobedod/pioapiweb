@@ -207,7 +207,7 @@ async function createVisitaEmergencia(req, res) {
                 },
                 body: JSON.stringify({
                     emisor: 'PIOAPP',
-                    email_receptor: 'oscar.alfaro@corporacionalisa.com',
+                    email_receptor: emailsList,
                     asunto: `AVISO VISITA ASIGNADA: ${tienda_nombre}`,
                     data_context: {
                         body: htmlBody
