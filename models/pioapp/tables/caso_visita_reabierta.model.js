@@ -8,7 +8,8 @@ CasoVisitaReabiertaModel.init({
     id_caso: { type: DataTypes.UUID, allowNull: false },
     id_visita: { type: DataTypes.INTEGER, allowNull: false },
     motivo_reapertura: { type: DataTypes.TEXT, allowNull: false },
-    fecha_reapertura: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW }
+    fecha_reapertura: { type: DataTypes.DATE, allowNull: false, defaultValue: DataTypes.NOW },
+    userCreatedAt: { type: DataTypes.BIGINT, allowNull: true },
 }, {
     sequelize,
     tableName: 'tbl_caso_visita_reabierta',

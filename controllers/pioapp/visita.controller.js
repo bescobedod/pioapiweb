@@ -329,6 +329,7 @@ async function getVisitasEmergenciaByCaso(req, res) {
     }
 }
 
+//Obtener visita registrada para la visita de emergencia
 async function getVisitaByVisitaEmergencia(req, res) {
     const { id_ve } = req.params;
 
@@ -348,6 +349,7 @@ async function getVisitaByVisitaEmergencia(req, res) {
     }
 }
 
+//Obtener las visitas que se han reabierto según el caso y el motivo
 async function getVisitasReabiertas(req, res) {
     const { id_v, id_c } = req.params;
 

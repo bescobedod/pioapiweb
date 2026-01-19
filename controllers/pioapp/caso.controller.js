@@ -309,6 +309,7 @@ async function cierreReaperturaCaso(req, res) {
             return res.status(404).json({ error: 'Caso no encontrado' });
         }
 
+        //Se obtienen los emails de los usuarios de la division y el creador del caso
         const usersEmail = await UserModel.findAll({
             where: {
                 [Op.or]: [
@@ -333,11 +334,13 @@ async function cierreReaperturaCaso(req, res) {
 
             await transaction.commit();
 
+            //Contruccion del correo que se envia automático
             const htmlBody = `
                 <h1>SE HA CERRADO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
                 <p>¡Felicidades! El caso se ha cerrado exitosamente</p>
                 <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
 
+            //Envio de correo electrónico a los usuarios
             const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
                 method: 'POST',
                 headers: {
@@ -384,7 +387,8 @@ async function cierreReaperturaCaso(req, res) {
             const casoVisita = await CasoVisitaReabiertaModel.create({
               id_caso: id_c,
               id_visita: visitaEmergencia.id_visita,
-              motivo_reapertura: motivo
+              motivo_reapertura: motivo,
+              userCreatedAt: req.user.id_user
             }, { transaction });
 
             await transaction.commit();
@@ -410,11 +414,13 @@ async function cierreReaperturaCaso(req, res) {
               console.warn('Notificación falló:', err.message);
             }
 
+            //Construccion del correo que se envia automatico
             const htmlBody = `
                 <h1>SE HA REABIERTO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
                 <p>${motivo}</p>
                 <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
 
+            //Envio del correo electronico a los usuarios
             const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
                 method: 'POST',
                 headers: {
