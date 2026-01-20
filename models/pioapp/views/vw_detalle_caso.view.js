@@ -21,7 +21,7 @@ function initVw_detalle_caso(sequelizeInstance) {
         sequelize: sequelizeInstance,
         tableName: 'vw_detalle_caso',
         schema: 'web',
-        timestamps: false,
+        timestamps: true,
     }
     );
 
