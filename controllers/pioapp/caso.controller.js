@@ -9,6 +9,7 @@ const {sequelizeInit} = require('../../configuration/db');
 const VisitaEmergenciaModel = require('../../models/pioapp/tables/visita_emergencia.model');
 const CasoVisitaReabiertaModel = require('../../models/pioapp/tables/caso_visita_reabierta.model');
 const UserModel = require('../../models/pioapp/tables/users.model');
+const PermisosEstadoModel = require('../../models/pioapp/tables/permiso_estado.model');
 const { Op } = require('sequelize');
 
 //Obtener todos los tipos de solicitudes para los casos
@@ -460,6 +461,24 @@ async function cierreReaperturaCaso(req, res) {
     }
 }
 
+//Permisos para cierre o reapertura de casos
+async function permiso_estado(req, res) {
+    try {
+        const permiso = await PermisosEstadoModel.findOne({
+            where: {
+                id_user: req.user.id_user
+            }
+        });
+
+        return res.json(permiso);
+    } catch (error) {
+        return res.status(500).json({
+            error: "Error al obtener permisos",
+            details: err.message
+        });
+    }
+}
+
 module.exports = {
     getAllTiposSolicitudes,
     getAllImpactos,
@@ -470,5 +489,6 @@ module.exports = {
     getCasosByDivision,
     getCasoById,
     updateCaso,
-    cierreReaperturaCaso
+    cierreReaperturaCaso,
+    permiso_estado
 }

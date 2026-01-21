@@ -51,5 +51,6 @@ router.get('/casos/getCasosByDivision/:division', auth, casos.getCasosByDivision
 router.get('/casos/getCasoById/:id_caso', auth, casos.getCasoById);
 router.put('/casos/updateCaso/:id_caso', auth, casos.updateCaso);
 router.put('/casos/cierreReaperturaCaso/:id_c/:id_e', auth, casos.cierreReaperturaCaso);
+router.get('/casos/permiso_estado', auth, casos.permiso_estado)
 
 module.exports = router;
