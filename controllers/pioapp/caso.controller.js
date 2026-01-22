@@ -311,22 +311,22 @@ async function cierreReaperturaCaso(req, res) {
         }
 
         //Se obtienen los emails de los usuarios de la division y el creador del caso
-        const usersEmail = await UserModel.findAll({
-            where: {
-                [Op.or]: [
-                    { id_users: req.user.id_user },
-                    { division: caso.division }
-                ]
-            },
-            attributes: ['email'],
-            raw: true
-        });
+        // const usersEmail = await UserModel.findAll({
+        //     where: {
+        //         [Op.or]: [
+        //             { id_users: req.user.id_user },
+        //             { division: caso.division }
+        //         ]
+        //     },
+        //     attributes: ['email'],
+        //     raw: true
+        // });
 
-        const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
+        // const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
             
-        const basicAuth = Buffer
-            .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
-            .toString('base64');
+        // const basicAuth = Buffer
+        //     .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
+        //     .toString('base64');
 
         // CIERRE DE CASO
         if (estado === 4) {
@@ -336,33 +336,33 @@ async function cierreReaperturaCaso(req, res) {
             await transaction.commit();
 
             //Contruccion del correo que se envia automático
-            const htmlBody = `
-                <h1>SE HA CERRADO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
-                <p>¡Felicidades! El caso se ha cerrado exitosamente</p>
-                <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
+            // const htmlBody = `
+            //     <h1>SE HA CERRADO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
+            //     <p>¡Felicidades! El caso se ha cerrado exitosamente</p>
+            //     <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
 
-            //Envio de correo electrónico a los usuarios
-            const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${basicAuth}`,
-                },
-                body: JSON.stringify({
-                    emisor: 'PIOAPP',
-                    email_receptor: emailsList,
-                    asunto: `AVISO CASO CERRADO: ${caso.tienda_nombre}`,
-                    data_context: {
-                        body: htmlBody
-                    }
-                })
-            });
+            // //Envio de correo electrónico a los usuarios
+            // const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': `Basic ${basicAuth}`,
+            //     },
+            //     body: JSON.stringify({
+            //         emisor: 'PIOAPP',
+            //         email_receptor: emailsList,
+            //         asunto: `AVISO CASO CERRADO: ${caso.tienda_nombre}`,
+            //         data_context: {
+            //             body: htmlBody
+            //         }
+            //     })
+            // });
 
-            const dataNotification = await notification.json();
+            // const dataNotification = await notification.json();
             
-            if(!notification.ok){
-                throw new Error(dataNotification.message);    
-            }
+            // if(!notification.ok){
+            //     throw new Error(dataNotification.message);    
+            // }
 
             return res.json({
               message: 'Caso cerrado correctamente',
@@ -416,33 +416,33 @@ async function cierreReaperturaCaso(req, res) {
             }
 
             //Construccion del correo que se envia automatico
-            const htmlBody = `
-                <h1>SE HA REABIERTO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
-                <p>${motivo}</p>
-                <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
+            // const htmlBody = `
+            //     <h1>SE HA REABIERTO EL CASO ${caso.correlativo} PARA LA TIENDA: ${caso.tienda_nombre}</h1>
+            //     <p>${motivo}</p>
+            //     <p style='color: red;'>Puedes ver el estado del caso en: https://pioapp.pinulitogt.com/</p>`;
 
-            //Envio del correo electronico a los usuarios
-            const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${basicAuth}`,
-                },
-                body: JSON.stringify({
-                    emisor: 'PIOAPP',
-                    email_receptor: emailsList,
-                    asunto: `AVISO CASO REABIERTO: ${caso.tienda_nombre}`,
-                    data_context: {
-                        body: htmlBody
-                    }
-                })
-            });
+            // //Envio del correo electronico a los usuarios
+            // const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': `Basic ${basicAuth}`,
+            //     },
+            //     body: JSON.stringify({
+            //         emisor: 'PIOAPP',
+            //         email_receptor: emailsList,
+            //         asunto: `AVISO CASO REABIERTO: ${caso.tienda_nombre}`,
+            //         data_context: {
+            //             body: htmlBody
+            //         }
+            //     })
+            // });
 
-            const dataNotification = await notification.json();
+            // const dataNotification = await notification.json();
             
-            if(!notification.ok){
-                throw new Error(dataNotification.message);    
-            }
+            // if(!notification.ok){
+            //     throw new Error(dataNotification.message);    
+            // }
 
             return res.json({
               message: 'Caso reabierto correctamente',
