@@ -154,39 +154,39 @@ async function createCaso(req, res) {
                 raw: true
             });
 
-            const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
+            // const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
 
-            const htmlBody = `
-                <h1>SE HA CREADO EL CASO ${nuevoCaso.correlativo} PARA LA TIENDA: ${tienda_nombre}</h1>
-                <p>${mensaje}</p>
-                <p style='color: red;'>Puedes ver el estado del caso en: <a href="https://pioapp.pinulitogt.com/">https://pioapp.pinulitogt.com/</a></p>
-                <hr>`;
+            // const htmlBody = `
+            //     <h1>SE HA CREADO EL CASO ${nuevoCaso.correlativo} PARA LA TIENDA: ${tienda_nombre}</h1>
+            //     <p>${mensaje}</p>
+            //     <p style='color: red;'>Puedes ver el estado del caso en: <a href="https://pioapp.pinulitogt.com/">https://pioapp.pinulitogt.com/</a></p>
+            //     <hr>`;
 
-            const basicAuth = Buffer
-                .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
-                .toString('base64');
+            // const basicAuth = Buffer
+            //     .from(`${process.env.BASIC_NOTI_AUTH_USER}:${process.env.BASIC_NOTI_AUTH_PASS}`)
+            //     .toString('base64');
 
-            const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Basic ${basicAuth}`,
-                },
-                body: JSON.stringify({
-                    emisor: 'PIOAPP',
-                    email_receptor: emailsList,
-                    asunto: `AVISO CASO CREADO: ${tienda_nombre}`,
-                    data_context: {
-                        body: htmlBody
-                    }
-                })
-            });
+            // const notification = await fetch(`https://services.sistemaspinulito.com/notificaciones/mail/send`, {
+            //     method: 'POST',
+            //     headers: {
+            //         'Content-Type': 'application/json',
+            //         'Authorization': `Basic ${basicAuth}`,
+            //     },
+            //     body: JSON.stringify({
+            //         emisor: 'PIOAPP',
+            //         email_receptor: emailsList,
+            //         asunto: `AVISO CASO CREADO: ${tienda_nombre}`,
+            //         data_context: {
+            //             body: htmlBody
+            //         }
+            //     })
+            // });
 
-            const dataNotification = await notification.json();
+            // const dataNotification = await notification.json();
             
-            if(!notification.ok){
-                throw new Error(dataNotification.message);    
-            }
+            // if(!notification.ok){
+            //     throw new Error(dataNotification.message);    
+            // }
             return res.json({ nuevoCaso });
         }
     } catch (err) {
