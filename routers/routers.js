@@ -6,6 +6,7 @@ const empleados = require('../controllers/nomina/empleado.controller');
 const supervisores = require('../controllers/pdv/vwDwhSupervisores.controller');
 const tiendas = require('../controllers/pdv/vwTiendasModulo.controller');
 const casos = require('../controllers/pioapp/caso.controller');
+const menus = require('../controllers/pioapp/menu.controller');
 const login = require('../services/authService');
 const auth = require('../middlewares/auth.middleware');
 
@@ -25,6 +26,10 @@ router.get('/visitas/getVisitasReabiertas/:id_v/:id_c', auth, visita.getVisitasR
 router.get('/users/getAllUsers', auth, users.getAllUsers);
 router.get('/users/getAllSupervisors', auth, users.getAllSupervisors);
 router.put('/users/updateUser', auth, users.updateUser);
+router.get('/users/getUsersByRole/:role', auth, users.getUsersByRole);
+router.post('/users/createPermisoCaso/:id_user', auth, users.createPermisoCaso);
+router.put('/users/quitPermisoCaso/:id_user', auth, users.quitPermisoCaso);
+router.get('/users/getUsersPermisosEstados', auth, users.getUsersPermisosEstados);
 
 //EMPLEADOS
 router.get('/empleados/getAllEmpleados', auth, empleados.getAllEmpleados);
@@ -52,5 +57,8 @@ router.get('/casos/getCasoById/:id_caso', auth, casos.getCasoById);
 router.put('/casos/updateCaso/:id_caso', auth, casos.updateCaso);
 router.put('/casos/cierreReaperturaCaso/:id_c/:id_e', auth, casos.cierreReaperturaCaso);
 router.get('/casos/permiso_estado', auth, casos.permiso_estado)
+
+//MENUS
+router.get('/menus/getMenuByRol', auth, menus.getMenuByRol);
 
 module.exports = router;

@@ -466,7 +466,8 @@ async function permiso_estado(req, res) {
     try {
         const permiso = await PermisosEstadoModel.findOne({
             where: {
-                id_user: req.user.id_user
+                id_user: req.user.id_user,
+                puede_modificar: true
             }
         });
 
