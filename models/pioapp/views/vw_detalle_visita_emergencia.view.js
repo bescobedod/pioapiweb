@@ -15,12 +15,13 @@ function initVw_detalle_visita_emergencia(sequelizeInstance) {
         new_gps_longitude: { type: DataTypes.TEXT, allowNull: false },
         new_gps_latitude: { type: DataTypes.TEXT, allowNull: false },
         division: { type: DataTypes.INTEGER, allowNull: true },
-        id_caso: { type: DataTypes.UUID, allowNull: false, primaryKey: true }
+        id_caso: { type: DataTypes.UUID, allowNull: false, primaryKey: true },
+        fecha_proceso: { type: DataTypes.DATE, allowNull: true },
     }, {
         sequelize: sequelizeInstance,
         tableName: 'vw_detalle_visita_emergencia',
         schema: 'web',
-        timestamps: false
+        timestamps: true
     })
     return vw_detalle_visita_emergencia;
 }
