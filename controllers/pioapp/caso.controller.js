@@ -144,14 +144,14 @@ async function createCaso(req, res) {
             });
             
             const usersEmail = await UserModel.findAll({
-                where: {
-                    [Op.or]: [
-                        { id_users: req.user.id_user },
-                        { division: division }
-                    ]
-                },
-                attributes: ['email'],
-                raw: true
+              where: {
+                [Op.or]: [
+                  { division: division },
+                  { id_rol: { [Op.in]: [8, 9, 10] } }
+                ]
+              },
+              attributes: ['email'],
+              raw: true
             });
 
             const emailsList = usersEmail.map(u => u.email).filter(Boolean).join(", ");
