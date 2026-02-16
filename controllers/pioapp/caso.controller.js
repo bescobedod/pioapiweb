@@ -1,16 +1,23 @@
-const TipoSolicitudModel = require('../../models/pioapp/tables/tipo_solicitud.model')
+const { Op } = require('sequelize');
+const s3 = require('../../services/s3');
+const upload = require('../../middlewares/upload');
+const {sequelizeInit} = require('../../configuration/db');
+const CasoModel = require('../../models/pioapp/tables/caso.model');
+const UserModel = require('../../models/pioapp/tables/users.model');
 const ImpactoModel = require('../../models/pioapp/tables/impacto.model');
 const UrgenciaModel = require('../../models/pioapp/tables/urgencia.model');
-const CategoriaModel = require('../../models/pioapp/tables/categoria_caso.model');
-const SubcategoriaModel = require('../../models/pioapp/tables/subcategoria_caso.model');
-const CasoModel = require('../../models/pioapp/tables/caso.model');
 const Vw_detalle_caso = require('../../models/pioapp/views/vw_detalle_caso.view');
-const {sequelizeInit} = require('../../configuration/db');
+const CategoriaModel = require('../../models/pioapp/tables/categoria_caso.model');
+const CasoArchivoModel = require('../../models/pioapp/tables/caso_archivo.model');
+const TipoSolicitudModel = require('../../models/pioapp/tables/tipo_solicitud.model')
+const PermisosEstadoModel = require('../../models/pioapp/tables/permiso_estado.model');
+const SubcategoriaModel = require('../../models/pioapp/tables/subcategoria_caso.model');
 const VisitaEmergenciaModel = require('../../models/pioapp/tables/visita_emergencia.model');
 const CasoVisitaReabiertaModel = require('../../models/pioapp/tables/caso_visita_reabierta.model');
-const UserModel = require('../../models/pioapp/tables/users.model');
-const PermisosEstadoModel = require('../../models/pioapp/tables/permiso_estado.model');
-const { Op } = require('sequelize');
+
+const S3_BUCKET = process.env.AWS_BUCKET_NAME;
+const REGION = process.env.AWS_BUCKET_REGION;
+const PUBLIC_BASE = `https://${S3_BUCKET}.s3.${REGION}.amazonaws.com`;
 
 //Obtener todos los tipos de solicitudes para los casos
 async function getAllTiposSolicitudes(req, res) {
@@ -475,21 +482,169 @@ async function permiso_estado(req, res) {
     } catch (error) {
         return res.status(500).json({
             error: "Error al obtener permisos",
-            details: err.message
+            details: error.message
+        });
+    }
+}
+
+// Subir Archivos a S3
+async function uploadArchivosCaso(req, res) {
+    const { id_caso } = req.params;
+
+    try {
+        // Validar que S3_BUCKET esté configurado
+        if (!S3_BUCKET) {
+            return res.status(500).json({ 
+                error: "Configuración de S3 incompleta", 
+                details: "AWS_BUCKET_NAME no está definido" 
+            });
+        }
+
+        const caso = await CasoModel.findByPk(id_caso);
+        
+        if (!caso) return res.status(404).json({ error: 'Caso no encontrado' });
+
+        if (!req.files || req.files.length === 0) {
+            return res.status(400).json({ error: 'No se enviaron archivos' });
+        }
+
+        const resultados = [];
+        const errores = [];
+        
+        for (const file of req.files) {
+            try {
+                const key = s3.buildS3Key({
+                    id_caso,
+                    originalName: file.originalname,
+                    mimeType: file.mimetype
+                });
+
+                console.log(`Intentando subir archivo a S3: ${key}`);
+
+                const putRes = await s3.uploadBufferToS3({
+                    bucket: S3_BUCKET,
+                    key,
+                    buffer: file.buffer,
+                    contentType: file.mimetype
+                });
+
+                console.log(`Archivo subido exitosamente. S3 HTTP Status: ${putRes.httpStatusCode}`);
+
+                const registro = await CasoArchivoModel.create({
+                    id_caso,
+                    s3_bucket: S3_BUCKET,
+                    s3_key: key,
+                    nombre_original: file.originalname,
+                    mime_type: file.mimetype,
+                    bytes: file.size,
+                    userCreatedAt: req.user?.id_user
+                });
+
+                resultados.push({
+                    ...registro.get({ plain: true }),
+                    s3HttpStatus: putRes.httpStatusCode
+                });
+            } catch (fileError) {
+                console.error(`Error al subir archivo ${file.originalname}:`, fileError);
+                errores.push({
+                    nombre: file.originalname,
+                    error: fileError.message
+                });
+            }
+        }
+
+        if (resultados.length === 0 && errores.length > 0) {
+            return res.status(500).json({
+                error: "No se pudieron subir los archivos",
+                detalles: errores
+            });
+        }
+
+        return res.json({
+            message: 'Archivos procesados',
+            exitosos: resultados.length,
+            fallidos: errores.length,
+            archivos: resultados,
+            errores: errores.length > 0 ? errores : undefined
+        });
+    } catch (error) {
+        console.error('Error en uploadArchivosCaso:', error);
+        return res.status(500).json({
+            error: "Error al subir archivos",
+            details: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
+    }
+}
+
+//Listar archivos por caso
+async function getArchivosByCaso(req, res) {
+    const { id_caso } = req.params;
+    try {
+        const archivos = await CasoArchivoModel.findAll({ where: { id_caso }, raw: true });
+
+        // Generar URLs presignadas (válidas por 1 hora = 3600 segundos)
+        const salida = await Promise.all(
+            archivos.map(async (a) => {
+                const presignedUrl = await s3.getPresignedUrl({
+                    bucket: a.s3_bucket,
+                    key: a.s3_key,
+                    expiresInSec: 3600 // 1 hora
+                });
+
+                return {
+                    ...a,
+                    presignedUrl,
+                    expiresIn: '1 hora'
+                };
+            })
+        );
+
+        return res.json(salida);
+    } catch (err) {
+        return res.status(500).json({ error: 'Error al obtener archivos', details: err.message });
+    }
+}
+
+//Eliminar archivo por caso
+async function deleteArchivosCaso(req, res) {
+    const { id_caso, id_archivo } = req.params;
+
+    try {
+        const registro = await CasoArchivoModel.findOne({
+            where: { id_archivo, id_caso }
+        });
+
+        if(!registro) return res.status(404).json({ error: 'Archivo no encontrado' });
+
+        await s3.deleteFromS3({
+            bucket: registro.s3_bucket,
+            key: registro.s3_key
+        });
+        await registro.destroy();
+
+        return res.json({ message: 'Archivo eliminado' });
+    } catch (error) {
+        return res.status(500).json({
+            error: 'Error al eliminar el archivo',
+            details: error.message
         });
     }
 }
 
 module.exports = {
-    getAllTiposSolicitudes,
+    updateCaso,
+    createCaso,
+    getCasoById,
+    permiso_estado,
     getAllImpactos,
     getAllUrgencias,
     getAllCategorias,
-    getSubcategoriaByCategoria,
-    createCaso,
+    getArchivosByCaso,
     getCasosByDivision,
-    getCasoById,
-    updateCaso,
+    deleteArchivosCaso,
+    uploadArchivosCaso,
     cierreReaperturaCaso,
-    permiso_estado
+    getAllTiposSolicitudes,
+    getSubcategoriaByCategoria
 }
