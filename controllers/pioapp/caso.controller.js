@@ -337,7 +337,7 @@ async function cierreReaperturaCaso(req, res) {
 
         // CIERRE DE CASO
         if (estado === 4) {
-            await caso.update({ id_estado: 4 }, { transaction });
+            await caso.update({ id_estado: 4, mensaje_cierre: motivo }, { transaction });
             await caso.reload({ transaction });
 
             await transaction.commit();
