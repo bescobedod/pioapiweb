@@ -1,6 +1,5 @@
 const { Op } = require('sequelize');
 const s3 = require('../../services/s3');
-const upload = require('../../middlewares/upload');
 const {sequelizeInit} = require('../../configuration/db');
 const CasoModel = require('../../models/pioapp/tables/caso.model');
 const UserModel = require('../../models/pioapp/tables/users.model');

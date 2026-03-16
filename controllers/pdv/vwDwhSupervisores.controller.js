@@ -56,8 +56,6 @@ async function getSupervisorBycodEmpleado(req, res) {
   }
 }
 
-
-
 module.exports = {
     getAllSupervisors,
     getSupervisorBycodEmpleado

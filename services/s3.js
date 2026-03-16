@@ -22,13 +22,20 @@ function mimeExt(mime) {
 }
 
 function buildS3Key({ id_caso, originalName, mimeType }) {
-  // 👇 Ajusta tu prefix. RECOMENDADO: solo 'casos' (NO 'pioapp/casos')
   const prefix = (process.env.S3_PREFIX || 'casos').replace(/\/+$/, '');
   const extByName = (originalName && path.extname(originalName).toLowerCase()) || '';
-  const ext = extByName || mimeExt(mimeType) || '.jpg'; // fuerza extensión
+  const ext = extByName || mimeExt(mimeType) || '.jpg';
   const ts = Date.now();
   const rand = crypto.randomBytes(8).toString('hex');
   return `${prefix}/${id_caso}/${ts}-${rand}${ext}`;
+}
+
+function buildS3KeyPublicacion({ id_publicacion, originalName, mimeType }) {
+    const prefix = 'publicaciones';
+    const extByName = (originalName && path.extname(originalName).toLowerCase()) || '';
+    const ts = Date.now();
+    const rand = crypto.randomBytes(4).toString('hex');
+    return `${prefix}/${id_publicacion}/${ts}-${rand}${extByName}`;
 }
 
 async function uploadBufferToS3({ bucket, key, buffer, contentType }) {
@@ -69,4 +76,4 @@ async function getPresignedUrl({ bucket, key, expiresInSec = 3600 }) {
   return getSignedUrl(s3Client, new GetObjectCommand({ Bucket: bucket, Key: key }), { expiresIn: expiresInSec });
 }
 
-module.exports = { buildS3Key, uploadBufferToS3, deleteFromS3, getPresignedUrl };
+module.exports = { buildS3Key, buildS3KeyPublicacion, uploadBufferToS3, deleteFromS3, getPresignedUrl };

@@ -10,7 +10,6 @@
 
 **Solución:** Se reordenó para ejecutar primero la autenticación, luego el upload:
 ```javascript
-// ❌ ANTES (INCORRECTO)
 router.post('/casos/uploadArchivosCaso/:id_caso/archivos',
     upload.array('imagenes', 3),
     auth, casos.uploadArchivosCaso

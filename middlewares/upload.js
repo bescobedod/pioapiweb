@@ -2,11 +2,14 @@ const multer = require('multer');
 
 const MAX_FILE_SIZE = Number(process.env.MAX_FILE_SIZE_MB || 10) * 1024 * 1024;
 const ALLOWED_MIME = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/heic',
-  'image/heif'
+  'image/jpeg', 
+  'image/jpg', 
+  'image/png', 
+  'application/pdf', 
+  'video/mp4', 
+  'video/quicktime', // Para archivos .mov
+  'video/x-msvideo', // Para archivos .avi
+  'video/mpeg'
 ]);
 
 const storage = multer.memoryStorage();

@@ -1,5 +1,6 @@
 const UserModel = require('../../models/pioapp/tables/users.model');
 const PermisoEstadoModel = require('../../models/pioapp/tables/permiso_estado.model');
+const RolModel = require('../../models/pioapp/tables/rol.model');
 const InitVw_users = require('../../models/pioapp/views/vw_users.view');
 const initVw_visita_pioapp = require('../../models/pioapp/views/vw_visita_pioapp.view');
 const { sequelize } = require('../../configuration/db');
@@ -202,6 +203,23 @@ async function getUsersPermisosEstados(req, res) {
     }
 }
 
+async function getAllRoles(req, res) {
+    try {
+        const roles = await RolModel.findAll({
+            where: {
+                id_rol: [2,4,5]
+            }
+        });
+
+        return res.json(roles);
+    } catch (err) {
+        return res.status(500).json({
+            error: 'Error al obtener roles',
+            details: err.message
+        });
+    }
+}
+
 module.exports = {
     getAllUsers,
     getAllSupervisors,
@@ -209,5 +227,6 @@ module.exports = {
     updateUser,
     createPermisoCaso,
     quitPermisoCaso,
-    getUsersPermisosEstados
+    getUsersPermisosEstados,
+    getAllRoles
 }
