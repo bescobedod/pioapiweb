@@ -10,7 +10,7 @@ const empleados = require('../controllers/nomina/empleado.controller');
 const tiendas = require('../controllers/pdv/vwTiendasModulo.controller');
 const supervisores = require('../controllers/pdv/vwDwhSupervisores.controller');
 const publicaciones = require('../controllers/pioapp/publicacion.controller');
-const devoluciones = require('../controllers/pioapp/devolucion.controller');
+// const devoluciones = require('../controllers/pioapp/devolucion.controller');
 const upload = require('../middlewares/upload');
 
 //VISITAS
@@ -94,10 +94,10 @@ router.post('/publicaciones/deleteArchivos', auth, publicaciones.deleteArchivos)
 router.get('/publicaciones/getUsersViews/:id_publicacion', auth, publicaciones.getUsersViews);
 
 //DEVOLUCIONES
-router.get('/devoluciones/getAllDevoluciones', auth, devoluciones.getAllDevoluciones);
-router.get('/devoluciones/getDetalleDevolucionByDevolucion/:id_devolucion', auth, devoluciones.getDetalleDevolucionByDevolucion);
-router.get('/devoluciones/getAllDevolucionesEstado', auth, devoluciones.getAllDevolucionesEstado);
-router.put('/devoluciones/changeStatus/:id_devolucion', auth, devoluciones.changeStatus);
-router.get('/devoluciones/getAllDevolucionesMotivo', auth, devoluciones.getAllDevolucionesMotivo);
+// router.get('/devoluciones/getAllDevoluciones/:mes/:anio/:division', auth, devoluciones.getAllDevoluciones);
+// router.get('/devoluciones/getDetalleDevolucionByDevolucion/:id_devolucion', auth, devoluciones.getDetalleDevolucionByDevolucion);
+// router.get('/devoluciones/getAllDevolucionesEstado', auth, devoluciones.getAllDevolucionesEstado);
+// router.put('/devoluciones/changeStatus/:id_devolucion', auth, devoluciones.changeStatus);
+// router.get('/devoluciones/getAllDevolucionesMotivo', auth, devoluciones.getAllDevolucionesMotivo);
 
 module.exports = router;
