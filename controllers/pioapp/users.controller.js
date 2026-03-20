@@ -207,7 +207,7 @@ async function getAllRoles(req, res) {
     try {
         const roles = await RolModel.findAll({
             where: {
-                id_rol: [2,4,5]
+                id_rol: [2,4]
             }
         });
 

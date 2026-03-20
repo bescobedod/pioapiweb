@@ -208,7 +208,7 @@ async function createPublicacion(req, res) {
     const t = await sequelize.transaction();
     let rolesParsed = typeof id_roles === 'string' ? JSON.parse(id_roles) : id_roles;
 
-    if(!rolesParsed | !Array.isArray(rolesParsed) || rolesParsed.length === 0) {
+    if(!rolesParsed || !Array.isArray(rolesParsed) || rolesParsed.length === 0) {
         rolesParsed = [2, 4, 5];
     }
 
@@ -225,9 +225,11 @@ async function createPublicacion(req, res) {
 
         const usuariosDestino = await UserModel.findAll({
             where: {
-                id_rol: rolesParsed 
+                id_rol: {
+                    [Op.in]: rolesParsed
+                }
             },
-            attributes: ['id_users'],
+            attributes: ['id_users', 'division'],
             transaction: t
         });
 
@@ -244,7 +246,10 @@ async function createPublicacion(req, res) {
 
         const usersEmail = await UserModel.findAll({
             where: {
-                id_users: req.user.id_user
+                [Op.or]: [
+                    { id_users: req.user.id_user },
+                    { id_rol: { [Op.in]: [7]} }
+                ]
             },
             attributes: ['email'],
             raw: true
@@ -286,28 +291,28 @@ async function createPublicacion(req, res) {
 
         const usersNotificacion = usuariosDestino.map(u => Number(u.id_users))
 
-        // const movilNotification = await fetch(`https://kevin-unrelegated-ramon.ngrok-free.dev/api/notificaciones/send`, {
-        //         method: 'POST',
-        //         headers: {
-        //             'Content-Type': 'application/json',
-        //           Authorization: `Basic ${Buffer.from(
-        //             `${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_PASS}`
-        //           ).toString('base64')}`
-        //         },
-        //         body: JSON.stringify({
-        //             user: usersNotificacion,
-        //             body: nuevaPublicacion.mensaje,
-        //             title: `${nuevaPublicacion.titulo}`,
-        //             id_asunto_notificacion: 1,
-        //             data_payload: { id_publicacion:  nuevaPublicacion.id_publicacion}
-        //         })
-        //     })
+        const movilNotification = await fetch(`https://services.sistemaspinulito.com/pioapi/notificaciones/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                  Authorization: `Basic ${Buffer.from(
+                    `${process.env.BASIC_AUTH_USER}:${process.env.BASIC_AUTH_PASS}`
+                  ).toString('base64')}`
+                },
+                body: JSON.stringify({
+                    user: usersNotificacion,
+                    body: nuevaPublicacion.mensaje,
+                    title: `${nuevaPublicacion.titulo}`,
+                    id_asunto_notificacion: 1,
+                    data_payload: { id_publicacion:  nuevaPublicacion.id_publicacion}
+                })
+            })
 
-        //     const movil = await movilNotification.json();
-        //     if(!movilNotification.ok){
-        //         throw new Error(movil.message);
+            const movil = await movilNotification.json();
+            if(!movilNotification.ok){
+                throw new Error(movil.message);
                 
-        //     }
+            }
 
         await t.commit();
 
