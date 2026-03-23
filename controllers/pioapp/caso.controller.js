@@ -209,10 +209,21 @@ async function getCasosByDivision(req, res) {
     try {
         const sequelizePioApp = await sequelizeInit('PIOAPP');
         const vw_detalle_caso = Vw_detalle_caso(sequelizePioApp);
+
+        let condiciones = {
+            division: division
+        }
+
+        if(req.user.rol === 8) {
+            condiciones.creador = req.user.nombre;
+        } else if(req.user.rol === 10) {
+            condiciones.monitoreo = false;
+        } else if(req.user.rol === 13) {
+            condiciones.creador = req.user.nombre;
+            condiciones.monitoreo = true;
+        }
         const casos = await vw_detalle_caso.findAll({
-            where: {
-                division: division
-            },
+            where: condiciones,
             order: [
                 ['estado', 'ASC'],
                 ['correlativo', 'DESC']
@@ -518,16 +529,12 @@ async function uploadArchivosCaso(req, res) {
                     mimeType: file.mimetype
                 });
 
-                console.log(`Intentando subir archivo a S3: ${key}`);
-
                 const putRes = await s3.uploadBufferToS3({
                     bucket: S3_BUCKET,
                     key,
                     buffer: file.buffer,
                     contentType: file.mimetype
                 });
-
-                console.log(`Archivo subido exitosamente. S3 HTTP Status: ${putRes.httpStatusCode}`);
 
                 const registro = await CasoArchivoModel.create({
                     id_caso,

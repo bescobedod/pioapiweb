@@ -6,7 +6,8 @@ function initVw_detalle_permisos(sequelizeInstance) {
         id_user: { type: DataTypes.BIGINT, allowNull: false, primaryKey: true },
         usuario: { type: DataTypes.TEXT, allowNull: false, primaryKey: true },
         fecha: { type: DataTypes.DATE, allowNull: false },
-        creado_por: { type: DataTypes.TEXT, allowNull: false }
+        creado_por: { type: DataTypes.TEXT, allowNull: false },
+        id_rol: { type: DataTypes.INTEGER, allowNull: false }
     }, {
         sequelize: sequelizeInstance,
         tableName: 'vw_detalle_permisos',

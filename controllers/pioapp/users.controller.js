@@ -181,6 +181,9 @@ async function getUsersPermisosEstados(req, res) {
             where: {
                 id_user: {
                     [Op.ne]: req.user.id_user
+                },
+                id_rol: {
+                    [Op.notIn]: [11, 13]
                 }
             },
             order: [["fecha", "DESC"]],

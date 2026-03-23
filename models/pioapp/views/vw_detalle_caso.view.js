@@ -18,7 +18,8 @@ function initVw_detalle_caso(sequelizeInstance) {
         mensaje: { type: DataTypes.STRING(255), allowNull: false },
         correlativo: { type: DataTypes.BIGINT, allowNull: false },
         creador: { type: DataTypes.TEXT, allowNull: true },
-        mensaje_cierre: { type: DataTypes.STRING(500), allowNull: true }
+        mensaje_cierre: { type: DataTypes.STRING(500), allowNull: true },
+        monitoreo: { type: DataTypes.BOOLEAN, allowNull: false }
     }, {
         sequelize: sequelizeInstance,
         tableName: 'vw_detalle_caso',
