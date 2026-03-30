@@ -11,6 +11,7 @@ const tiendas = require('../controllers/pdv/vwTiendasModulo.controller');
 const supervisores = require('../controllers/pdv/vwDwhSupervisores.controller');
 const publicaciones = require('../controllers/pioapp/publicacion.controller');
 // const devoluciones = require('../controllers/pioapp/devolucion.controller');
+const pedidosYa = require('../controllers/pedidosYa/order.controller');
 const upload = require('../middlewares/upload');
 
 //VISITAS
@@ -99,5 +100,9 @@ router.get('/publicaciones/getUsersViews/:id_publicacion', auth, publicaciones.g
 // router.get('/devoluciones/getAllDevolucionesEstado', auth, devoluciones.getAllDevolucionesEstado);
 // router.put('/devoluciones/changeStatus/:id_devolucion', auth, devoluciones.changeStatus);
 // router.get('/devoluciones/getAllDevolucionesMotivo', auth, devoluciones.getAllDevolucionesMotivo);
+// router.get('/devoluciones/getReporteGeneralDevoluciones/:mes/:anio', auth, devoluciones.getReporteGeneralDevoluciones);
+
+// PEDIDOSYA
+router.get('/pedidosya/getOrders/:empresa/:tienda/:fechaInicio/:fechaFin/:nit', auth, pedidosYa.getOrdersDynamic);
 
 module.exports = router;
