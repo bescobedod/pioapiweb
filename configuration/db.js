@@ -50,19 +50,21 @@ const connectionMongo = async () => {
         const uri = process.env.MONGO_URI;
         if (!uri) return;
 
-        const caFilePath = path.join(__dirname, '../global-bundle.pem');
+        const caFilePath = path.join(process.cwd(), 'global-bundle.pem');
 
         await mongoose.connect(uri, {
             tls: true,
             tlsCAFile: caFilePath,
             tlsAllowInvalidHostnames: true,
-            directConnection: true 
+            retryWrites: false,
+            directConnection: true,
+            serverSelectionTimeoutMS: 5000
         });
 
         console.log("Conexión exitosa a MongoDB via Túnel SSH");
     } catch (error) {
         console.error("Error conectando a MongoDB: ", error.message);
-    }
+ }
 }
 
 module.exports = {
