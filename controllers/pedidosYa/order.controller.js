@@ -55,16 +55,16 @@ async function getOrdersDynamic(req, res) {
                 const valor = parseFloat(disc.amount) || 0;
                 return acc + valor;
             }, 0); 
-            // const metadatos = infoTiendas.find(t => 
-            //     t.codigo_tienda === order.tienda && 
-            //     t.codigo_empresa === order.empresa
-            // );
+            const metadatos = infoTiendas.find(t => 
+                t.codigo_tienda === order.tienda && 
+                t.codigo_empresa === order.empresa
+            );
 
             return {
                 ...orderObj,
                 total_descuento: totalDescuento,
-                // nombre_tienda: metadatos ? metadatos.nombre_tienda : 'Tienda no encontrada',
-                // nombre_empresa: metadatos ? metadatos.nombre_empresa : 'Empresa no encontrada'
+                nombre_tienda: metadatos ? metadatos.nombre_tienda : 'Tienda no encontrada',
+                nombre_empresa: metadatos ? metadatos.nombre_empresa : 'Empresa no encontrada'
             };
         });
 

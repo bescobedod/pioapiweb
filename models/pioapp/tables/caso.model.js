@@ -20,7 +20,8 @@ CasoModel.init({
     userCreatedAt: { type: DataTypes.BIGINT, allowNull: true },
     userUpdatedAt: { type: DataTypes.BIGINT, allowNull: true },
     correlativo: { type: DataTypes.BIGINT, allowNull: false, defaultValue: Sequelize.literal('DEFAULT'), field: 'correlativo'},
-    mensaje_cierre: { type: DataTypes.STRING(500), allowNull: true }
+    mensaje_cierre: { type: DataTypes.STRING(500), allowNull: true },
+    monitoreo: { type: DataTypes.BOOLEAN, allowNull: false }
 }, {
     sequelize,
     tableName: 'tbl_caso',

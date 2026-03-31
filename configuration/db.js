@@ -1,5 +1,7 @@
 const Sequelize = require("sequelize");
 const { configDatabase, DEFAULT_CONNECTION } = require("./configDatabase.js");
+const mongoose = require('mongoose');
+const path = require('path');
 
 //Definicion de base de datos por defecto
 const connections = {};
@@ -42,8 +44,31 @@ const connectionDb = async () => {
     }
 };
 
+//Conexion para MongoDB
+const connectionMongo = async () => {
+    try {
+        const uri = process.env.MONGO_URI;
+        if (!uri) return;
+
+        const caFilePath = path.join(__dirname, '../global-bundle.pem');
+
+        await mongoose.connect(uri, {
+            tls: true,
+            tlsCAFile: caFilePath,
+            tlsAllowInvalidHostnames: true,
+            directConnection: true 
+        });
+
+        console.log("Conexión exitosa a MongoDB via Túnel SSH");
+    } catch (error) {
+        console.error("Error conectando a MongoDB: ", error.message);
+    }
+}
+
 module.exports = {
     sequelize,
     sequelizeInit,
-    connectionDb
+    connectionDb,
+    connectionMongo,
+    mongoose
 };

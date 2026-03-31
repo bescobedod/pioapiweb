@@ -111,7 +111,9 @@ async function createCaso(req, res) {
             mensaje
         } = req.body;
 
-    try {        
+    try {
+        const esMonitoreo = req.user.rol === 13 ? true : false;
+
         //Validar que no existe un caso ya creado con los mismos parámetros para evitar duplicidad
         const casoDuplicado = await CasoModel.findOne({
             where: {
@@ -146,7 +148,8 @@ async function createCaso(req, res) {
                 id_categoria,
                 id_subcategoria,
                 mensaje,
-                userCreatedAt: req.user.id_user
+                userCreatedAt: req.user.id_user,
+                monitoreo: esMonitoreo
             });
             
             const usersEmail = await UserModel.findAll({
