@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   pioapiweb:
-    build: 
+    build:
       context: .
       dockerfile: Dockerfile
     container_name: pioapiweb
@@ -10,4 +10,6 @@ services:
       - "5005:5005"
     env_file:
       - .env
+    volumes:
+     - ./global-bundle.pem:/app/global-bundle.pem
     restart: unless-stopped
