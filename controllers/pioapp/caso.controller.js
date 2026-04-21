@@ -335,7 +335,8 @@ async function cierreReaperturaCaso(req, res) {
             where: {
                 [Op.or]: [
                     { id_users: req.user.id_user },
-                    { division: caso.division }
+                    { division: caso.division },
+                    { id_rol: 9 }
                 ]
             },
             attributes: ['email'],
