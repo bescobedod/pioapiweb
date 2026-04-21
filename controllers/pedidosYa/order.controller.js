@@ -18,7 +18,12 @@ async function getOrdersDynamic(req, res) {
         }
 
         if (nit && nit !== '0' && nit !== 'all' && nit !== '') {
-            query['orderData.corporateTaxId'] = new RegExp(`^${nit}$`, 'i');
+            const escapeRegex = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            query['orderData.corporateTaxId'] = {
+                $regex: `^${escapeRegex(nit)}$`,
+                $options: 'i'
+            };
         }
 
         const isValido = (v) => v && v !== '0' && v !== 'all' && v !== '';

@@ -555,7 +555,10 @@ async function uploadArchivosCaso(req, res) {
                     s3HttpStatus: putRes.httpStatusCode
                 });
             } catch (fileError) {
-                console.error(`Error al subir archivo ${file.originalname}:`, fileError);
+                console.error(`Error al subir archivo `, {
+                    archivo: sanitize(originalname),
+                    error: fileError.messag
+                });
                 errores.push({
                     nombre: file.originalname,
                     error: fileError.message
