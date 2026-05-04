@@ -10,7 +10,8 @@ const empleados = require('../controllers/nomina/empleado.controller');
 const tiendas = require('../controllers/pdv/vwTiendasModulo.controller');
 const supervisores = require('../controllers/pdv/vwDwhSupervisores.controller');
 const publicaciones = require('../controllers/pioapp/publicacion.controller');
-// const devoluciones = require('../controllers/pioapp/devolucion.controller');
+const devoluciones = require('../controllers/pioapp/devolucion.controller');
+const notas = require('../controllers/pioapp/nota_credito.controller');
 const pedidosYa = require('../controllers/pedidosYa/order.controller');
 const upload = require('../middlewares/upload');
 
@@ -95,12 +96,17 @@ router.post('/publicaciones/deleteArchivos', auth, publicaciones.deleteArchivos)
 router.get('/publicaciones/getUsersViews/:id_publicacion', auth, publicaciones.getUsersViews);
 
 //DEVOLUCIONES
-// router.get('/devoluciones/getAllDevoluciones/:mes/:anio/:division', auth, devoluciones.getAllDevoluciones);
-// router.get('/devoluciones/getDetalleDevolucionByDevolucion/:id_devolucion', auth, devoluciones.getDetalleDevolucionByDevolucion);
-// router.get('/devoluciones/getAllDevolucionesEstado', auth, devoluciones.getAllDevolucionesEstado);
-// router.put('/devoluciones/changeStatus/:id_devolucion', auth, devoluciones.changeStatus);
-// router.get('/devoluciones/getAllDevolucionesMotivo', auth, devoluciones.getAllDevolucionesMotivo);
-// router.get('/devoluciones/getReporteGeneralDevoluciones/:mes/:anio', auth, devoluciones.getReporteGeneralDevoluciones);
+router.get('/devoluciones/getAllDevoluciones/:fechaInicio/:fechaFin/:division', auth, devoluciones.getAllDevoluciones);
+router.get('/devoluciones/getDetalleDevolucionByDevolucion/:id_devolucion', auth, devoluciones.getDetalleDevolucionByDevolucion);
+router.get('/devoluciones/getAllDevolucionesEstado', auth, devoluciones.getAllDevolucionesEstado);
+router.put('/devoluciones/changeStatus/:id_devolucion', auth, devoluciones.changeStatus);
+router.get('/devoluciones/getAllDevolucionesMotivo', auth, devoluciones.getAllDevolucionesMotivo);
+router.get('/devoluciones/getReporteGeneralDevoluciones/:fechaInicio/:fechaFin', auth, devoluciones.getReporteGeneralDevoluciones);
+
+//NOTAS DE CREDITO
+router.get('/notas/getNotasCredito/:mes/:anio/:division', auth, notas.getNotasCredito);
+router.get('/notas/getDetalleNotaCreditoByNota/:id_nota', auth, notas.getDetalleNotaCreditoByNota);
+router.put('/notas/changeStatus/:id_nota', auth, notas.changeStatus);
 
 // PEDIDOSYA
 router.get('/pedidosya/getOrders/:empresa/:tienda/:fechaInicio/:fechaFin/:nit', auth, pedidosYa.getOrdersDynamic);
